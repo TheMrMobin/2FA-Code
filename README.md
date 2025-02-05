@@ -121,3 +121,5 @@ Get-2FA-Code/
 
 
 Enjoy generating your 2FA codes! 🔐
+
+[![Stargazers over time](https://starchart.cc/TheMrMobin/2FA-Code.svg?variant=adaptive)](https://starchart.cc/TheMrMobin/2FA-Code)
