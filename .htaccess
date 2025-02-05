@@ -1,0 +1,9 @@
+RewriteEngine On
+RewriteBase /2FA/
+
+# اطمینان از اینکه درخواست به فایل یا پوشه واقعی نرود
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# بازنویسی آدرس‌های `/2FA/hash-value` به `index.php?hash=hash-value`
+RewriteRule ^([a-zA-Z0-9]+)$ index.php?hash=$1 [L,QSA]
