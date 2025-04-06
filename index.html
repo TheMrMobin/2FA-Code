@@ -109,6 +109,79 @@
         .modal-body {
             color: #555;
         }
+
+        /* استایل پاپ‌آپ تبلیغاتی */
+        .ad-popup {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 15px 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 400px;
+            width: 90%;
+            z-index: 1000;
+            animation: fadeIn 0.5s ease-in-out forwards;
+        }
+
+        .ad-popup.show {
+            display: flex;
+        }
+
+        .ad-content {
+            display: flex;
+            align-items: center;
+            color: #333;
+            font-size: 1rem;
+        }
+
+        .ad-content i {
+            color: #667eea;
+            margin-left: 10px;
+            font-size: 1.5rem;
+        }
+
+        .ad-content a {
+            color: #764ba2;
+            font-weight: bold;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .ad-content a:hover {
+            color: #667eea;
+            text-decoration: underline;
+        }
+
+        .ad-close-btn {
+            background: none;
+            border: none;
+            color: #6c757d;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .ad-close-btn:hover {
+            color: #333;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
     </style>
 </head>
 
@@ -134,12 +207,17 @@
     <footer class="footer">
         <div class="container">
             <span class="text-muted">تمامی حقوق محفوظ میباشد © 2025</span>
-            <br>
-            <!--<a href="https://t.me/HoleshCloud" target="_blank" style="color: #fff; text-decoration: none;">-->
-            <!--    <i class="fab fa-telegram-plane"></i> HoleshCloud-->
-            <!--</a>-->
         </div>
     </footer>
+
+    <!-- پاپ‌آپ تبلیغاتی -->
+    <div class="ad-popup" id="adPopup">
+        <div class="ad-content">
+            <span>برای خدمات ابری امن و سریع، به کانال ما در تلگرام بپیوندید: <a href="https://t.me/HoleshCloud" target="_blank">@HoleshCloud</a></span>
+            <i class="fab fa-telegram-plane"></i>
+        </div>
+        <button class="ad-close-btn" onclick="closeAdPopup()"><i class="fas fa-times"></i></button>
+    </div>
 
     <!-- مدال Bootstrap -->
     <div class="modal fade" id="copyModal" tabindex="-1" aria-labelledby="copyModalLabel" aria-hidden="true">
@@ -242,6 +320,21 @@
                 console.error('خطا در کپی کردن کد: ', err);
             });
         }
+
+        // تابع نمایش پاپ‌آپ تبلیغاتی
+        function showAdPopup() {
+            const adPopup = document.getElementById('adPopup');
+            adPopup.classList.add('show');
+        }
+
+        // تابع بستن پاپ‌آپ
+        function closeAdPopup() {
+            const adPopup = document.getElementById('adPopup');
+            adPopup.style.display = 'none';
+        }
+
+        // نمایش پاپ‌آپ بعد از 2 ثانیه
+        setTimeout(showAdPopup, 2000);
     </script>
 </body>
 
