@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="fa" dir="rtl">
+<html lang="en" dir="ltr">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>سرویس دریافت 2FA</title>
+    <title>2FA Code Service - Space Edition</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/fontawesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/yekan-font@1.0.0/css/yekan-font.min.css" rel="stylesheet">
@@ -12,291 +12,1006 @@
     <script src="https://unpkg.com/@otplib/preset-browser@12.0.1/index.js"></script>
 
     <style>
-        body {
-            background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
-            font-family: 'yekan', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0a;
             color: #fff;
+            overflow-x: hidden;
+            position: relative;
+            min-height: 100vh;
+        }
+
+        body[dir="rtl"] {
+            font-family: 'yekan', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* Animated Space Background */
+        .space-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(ellipse at center, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        }
+
+        .stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(2px 2px at 20px 30px, #eee, transparent),
+                radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.8), transparent),
+                radial-gradient(1px 1px at 90px 40px, #fff, transparent),
+                radial-gradient(1px 1px at 130px 80px, rgba(255,255,255,0.6), transparent),
+                radial-gradient(2px 2px at 160px 30px, #ddd, transparent);
+            background-repeat: repeat;
+            background-size: 200px 100px;
+            animation: twinkle 4s ease-in-out infinite;
+        }
+
+        .stars:nth-child(2) {
+            background-size: 300px 150px;
+            animation-delay: -2s;
+        }
+
+        .stars:nth-child(3) {
+            background-size: 400px 200px;
+            animation-delay: -1s;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; }
+        }
+
+        /* Floating Particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: linear-gradient(45deg, #00d4ff, #ff00ff);
+            border-radius: 50%;
+            animation: float-particle 6s infinite linear;
+        }
+
+        @keyframes float-particle {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Main Container */
+        .main-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Glass Card */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+            max-width: 500px;
+            width: 100%;
+            transition: all 0.4s ease;
+        }
+
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .glass-card:hover::before {
+            left: 100%;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 35px 55px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Icon */
+        .security-icon {
+            font-size: 4rem;
+            color: #00d4ff;
+            margin-bottom: 30px;
+            animation: pulse-glow 2s ease-in-out infinite alternate;
+            text-shadow: 0 0 20px #00d4ff;
+        }
+
+        @keyframes pulse-glow {
+            0% {
+                transform: scale(1);
+                text-shadow: 0 0 20px #00d4ff;
+            }
+            100% {
+                transform: scale(1.1);
+                text-shadow: 0 0 30px #00d4ff, 0 0 40px #00d4ff;
+            }
+        }
+
+        /* Code Display */
+        .code-container {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(255, 0, 255, 0.1));
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 30px 0;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
             overflow: hidden;
         }
 
-        .container {
-            flex-grow: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
+        .code-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent, rgba(0, 212, 255, 0.1), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s;
         }
 
-        .card {
-            border: none;
-            border-radius: 25px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(12px);
-            transition: transform 0.4s ease, box-shadow 0.4s ease;
-            width: 100%;
-            max-width: 420px;
-            padding: 20px;
+        .code-container:hover::before {
+            transform: translateX(100%);
         }
 
-        .card:hover {
-            transform: translateY(-12px);
-            box-shadow: 0 14px 45px rgba(0, 0, 0, 0.25);
-        }
-
-        .timer {
-            font-size: clamp(1rem, 3vw, 1.2rem);
-            color: #4a5568;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .footer {
-            background-color: rgba(255, 255, 255, 0.1);
-            text-align: center;
-            padding: 12px 0;
-            margin-top: auto;
-            backdrop-filter: blur(6px);
-            font-size: clamp(0.8rem, 2.5vw, 0.9rem);
-            color: #e2e8f0;
+        .code-container:hover {
+            border-color: #00d4ff;
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+            transform: scale(1.02);
         }
 
         .code-display {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            letter-spacing: 8px;
+            margin: 0;
+            transition: all 0.3s ease;
+        }
+
+        .code-container:hover .code-display {
+            color: #00d4ff;
+            text-shadow: 0 0 20px #00d4ff;
+        }
+
+        /* Timer */
+        .timer-container {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .timer {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 1.1rem;
+            color: #00d4ff;
+        }
+
+        .timer i {
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #00d4ff, #ff00ff);
+            border-radius: 3px;
+            transition: width 1s linear;
+            position: relative;
+        }
+
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* Buttons */
+        .btn-space {
+            background: linear-gradient(135deg, #00d4ff, #ff00ff);
+            border: none;
+            border-radius: 15px;
+            padding: 15px 30px;
+            color: white;
+            font-weight: bold;
+            font-size: 1rem;
             cursor: pointer;
-            transition: transform 0.3s ease, color 0.3s ease;
-            font-size: clamp(2rem, 5.5vw, 2.8rem);
-            font-weight: 700;
-            color: #2d3748;
-            letter-spacing: 2px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            margin: 10px;
         }
 
-        .code-display:hover {
-            transform: scale(1.05);
-            color: #5a67d8;
+        .btn-space::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
         }
 
-        .fa-shield-alt {
-            color: #5a67d8;
-            animation: float 3s ease-in-out infinite;
-            font-size: clamp(3rem, 8vw, 4rem);
-            margin-bottom: 20px;
+        .btn-space:hover::before {
+            left: 100%;
         }
 
-        @keyframes float {
-            0%, 100% {
+        .btn-space:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 212, 255, 0.4);
+        }
+
+        /* Modal */
+        .modal-content {
+            background: rgba(26, 26, 46, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 20px;
+            color: white;
+        }
+
+        .modal-header {
+            border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+        }
+
+        .modal-footer {
+            border-top: 1px solid rgba(0, 212, 255, 0.2);
+        }
+
+        /* Footer */
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            padding: 15px 0;
+            text-align: center;
+            border-top: 1px solid rgba(0, 212, 255, 0.2);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .glass-card {
+                padding: 30px 20px;
+                margin: 20px;
+                max-width: 95%;
+            }
+            
+            .code-display {
+                font-size: 2rem;
+                letter-spacing: 4px;
+            }
+            
+            .security-icon {
+                font-size: 3rem;
+            }
+
+            .copy-success {
+                right: 10px;
+                left: 10px;
+                transform: translateY(-100px);
+                max-width: calc(100% - 20px);
+            }
+
+            .copy-success.show {
                 transform: translateY(0);
             }
-            50% {
-                transform: translateY(-12px);
+        }
+
+        @media (max-width: 480px) {
+            .glass-card {
+                padding: 25px 15px;
+                margin: 15px;
+                border-radius: 20px;
+            }
+            
+            .code-display {
+                font-size: 1.8rem;
+                letter-spacing: 2px;
+            }
+            
+            .security-icon {
+                font-size: 2.5rem;
+            }
+
+            h2 {
+                font-size: 1.5rem !important;
+            }
+
+            .timer {
+                font-size: 1rem;
+            }
+
+            .btn-space {
+                padding: 12px 20px;
+                font-size: 0.9rem;
+            }
+
+            .footer {
+                padding: 10px 0;
+                font-size: 0.8rem;
             }
         }
 
-        .btn-primary {
-            background-color: #5a67d8;
-            border: none;
-            border-radius: 12px;
-            padding: 12px 24px;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            font-size: clamp(0.9rem, 2.5vw, 1rem);
+        @media (max-width: 360px) {
+            .glass-card {
+                padding: 20px 10px;
+                margin: 10px;
+            }
+            
+            .code-display {
+                font-size: 1.5rem;
+                letter-spacing: 1px;
+            }
+            
+            .security-icon {
+                font-size: 2rem;
+            }
+
+            h2 {
+                font-size: 1.3rem !important;
+            }
+
+            .timer {
+                font-size: 0.9rem;
+            }
+
+            .btn-space {
+                padding: 10px 15px;
+                font-size: 0.8rem;
+            }
         }
 
-        .btn-primary:hover {
-            background-color: #6b46c1;
+        /* Landscape orientation for mobile */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .main-container {
+                padding: 10px;
+            }
+            
+            .glass-card {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            .security-icon {
+                font-size: 2rem;
+                margin-bottom: 15px;
+            }
+            
+            h2 {
+                font-size: 1.4rem !important;
+                margin-bottom: 15px !important;
+            }
+            
+            .code-container {
+                padding: 20px;
+                margin: 15px 0;
+            }
+            
+            .timer-container {
+                padding: 15px;
+                margin: 15px 0;
+            }
+        }
+
+        /* High DPI displays */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            .stars {
+                background-image: 
+                    radial-gradient(1px 1px at 20px 30px, #eee, transparent),
+                    radial-gradient(1px 1px at 40px 70px, rgba(255,255,255,0.8), transparent),
+                    radial-gradient(0.5px 0.5px at 90px 40px, #fff, transparent),
+                    radial-gradient(0.5px 0.5px at 130px 80px, rgba(255,255,255,0.6), transparent),
+                    radial-gradient(1px 1px at 160px 30px, #ddd, transparent);
+            }
+        }
+
+        /* Touch devices */
+        @media (hover: none) and (pointer: coarse) {
+            .glass-card:hover {
+                transform: none;
+            }
+            
+            .code-container:hover {
+                transform: none;
+            }
+            
+            .btn-space:hover {
+                transform: none;
+            }
+            
+            .glass-card::before {
+                display: none;
+            }
+            
+            .code-container::before {
+                display: none;
+            }
+            
+            .btn-space::before {
+                display: none;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0, 212, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #00d4ff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        /* Copy Success Animation */
+        .copy-success {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #00d4ff, #ff00ff);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 212, 255, 0.3);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .copy-success.show {
+            transform: translateX(0);
+        }
+
+        /* Mouse Trail Effect */
+        .mouse-trail {
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            mix-blend-mode: screen;
+        }
+
+        .trail-dot {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: radial-gradient(circle, #00d4ff 0%, rgba(0, 212, 255, 0.6) 50%, transparent 100%);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            animation: trailFade 1s ease-out forwards;
+            box-shadow: 0 0 20px #00d4ff, 0 0 40px rgba(0, 212, 255, 0.5);
+        }
+
+        .trail-dot:nth-child(odd) {
+            background: radial-gradient(circle, #ff00ff 0%, rgba(255, 0, 255, 0.6) 50%, transparent 100%);
+            box-shadow: 0 0 20px #ff00ff, 0 0 40px rgba(255, 0, 255, 0.5);
+        }
+
+        .trail-dot:nth-child(3n) {
+            background: radial-gradient(circle, #00ff88 0%, rgba(0, 255, 136, 0.6) 50%, transparent 100%);
+            box-shadow: 0 0 20px #00ff88, 0 0 40px rgba(0, 255, 136, 0.5);
+        }
+
+        @keyframes trailFade {
+            0% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+            50% {
+                opacity: 0.7;
+                transform: translate(-50%, -50%) scale(1.5);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.5);
+            }
+        }
+
+        /* Cursor glow effect */
+        .cursor-glow {
+            position: fixed;
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle, rgba(0, 212, 255, 0.3) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9998;
+            transform: translate(-50%, -50%);
+            transition: all 0.1s ease;
+            mix-blend-mode: screen;
+        }
+
+        /* Disable trail on touch devices */
+        @media (hover: none) and (pointer: coarse) {
+            .mouse-trail,
+            .cursor-glow {
+                display: none;
+            }
+        }
+
+        /* Language Switcher */
+        .language-switcher {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+        }
+
+        .language-btn {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 10px;
+            padding: 8px 12px;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .language-btn:hover {
+            background: rgba(0, 212, 255, 0.2);
+            border-color: #00d4ff;
             transform: translateY(-2px);
         }
 
-        .modal-content {
-            border-radius: 20px;
-            background: rgba(255, 255, 255, 0.97);
-            backdrop-filter: blur(12px);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-        }
-
-        .modal-header, .modal-footer {
-            border: none;
-        }
-
-        .modal-title {
-            color: #2d3748;
-            font-size: clamp(1.2rem, 3vw, 1.5rem);
-        }
-
-        .modal-body {
-            color: #4a5568;
-            font-size: clamp(0.9rem, 2.5vw, 1rem);
-        }
-
-        .ad-popup {
-            position: fixed;
-            bottom: 25px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(255, 255, 255, 0.97);
-            backdrop-filter: blur(12px);
-            border-radius: 20px;
-            padding: 15px 20px;
-            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
-            display: none;
-            align-items: center;
-            justify-content: space-between;
-            max-width: 90%;
-            width: 420px;
-            z-index: 1000;
-            animation: fadeIn 0.6s ease-in-out forwards;
-            font-size: clamp(0.85rem, 2.5vw, 0.95rem);
-        }
-
-        .ad-popup.show {
-            display: flex;
-        }
-
-        .ad-content {
-            display: flex;
-            align-items: center;
-            color: #2d3748;
-            gap: 10px;
-        }
-
-        .ad-content i {
-            color: #5a67d8;
-            font-size: clamp(1.2rem, 3vw, 1.5rem);
-        }
-
-        .ad-content a {
-            color: #6b46c1;
-            font-weight: bold;
-            text-decoration: none;
-            transition: color 0.3s ease;
-        }
-
-        .ad-content a:hover {
-            color: #5a67d8;
-            text-decoration: underline;
-        }
-
-        .ad-close-btn {
-            background: none;
-            border: none;
-            color: #4a5568;
-            font-size: clamp(1rem, 3vw, 1.2rem);
-            cursor: pointer;
-            transition: color 0.3s ease, transform 0.2s ease;
-        }
-
-        .ad-close-btn:hover {
-            color: #2d3748;
-            transform: scale(1.1);
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateX(-50%) translateY(25px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(-50%) translateY(0);
-            }
-        }
-
-        .cursor-follower {
-            position: fixed;
+        .language-btn img {
             width: 20px;
-            height: 20px;
-            background-color: rgba(90, 103, 216, 0.5);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 1000;
-            transform: translate(-50%, -50%);
-            transition: transform 0.1s ease;
-            display: none;
+            height: 15px;
+            border-radius: 2px;
+            object-fit: cover;
         }
 
-        @media (pointer: fine) {
-            .cursor-follower {
-                display: block;
-            }
+        .language-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: rgba(26, 26, 46, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 10px;
+            padding: 8px 0;
+            margin-top: 5px;
+            min-width: 150px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
         }
 
-        @media (max-width: 576px) {
-            .card {
-                padding: 15px;
-                max-width: 95%;
+        .language-dropdown.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .language-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 15px;
+            color: white;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            font-size: 0.9rem;
+        }
+
+        .language-option:hover {
+            background: rgba(0, 212, 255, 0.2);
+        }
+
+        .language-option.active {
+            background: rgba(0, 212, 255, 0.3);
+            color: #00d4ff;
+        }
+
+        .language-option img {
+            width: 20px;
+            height: 15px;
+            border-radius: 2px;
+            object-fit: cover;
+        }
+
+        /* RTL Support */
+        [dir="rtl"] .language-switcher {
+            left: auto;
+            right: 20px;
+        }
+
+        [dir="rtl"] .language-dropdown {
+            left: auto;
+            right: 0;
+        }
+
+        /* Mobile responsive for language switcher */
+        @media (max-width: 768px) {
+            .language-switcher {
+                top: 15px;
+                left: 15px;
             }
-            .container {
-                padding: 10px;
+
+            [dir="rtl"] .language-switcher {
+                left: auto;
+                right: 15px;
             }
-            .ad-popup {
-                bottom: 15px;
-                padding: 10px 15px;
-                width: 95%;
+
+            .language-btn {
+                padding: 6px 10px;
+                font-size: 0.8rem;
             }
-            .fa-shield-alt {
-                font-size: clamp(2.5rem, 7vw, 3rem);
+
+            .language-btn img {
+                width: 18px;
+                height: 13px;
+            }
+
+            .language-dropdown {
+                min-width: 130px;
+            }
+
+            .language-option {
+                padding: 6px 12px;
+                font-size: 0.8rem;
+            }
+
+            .language-option img {
+                width: 18px;
+                height: 13px;
             }
         }
     </style>
 </head>
 
 <body>
-    <div class="cursor-follower" id="cursorFollower"></div>
+    <!-- Mouse Trail Container -->
+    <div class="mouse-trail" id="mouseTrail"></div>
+    <div class="cursor-glow" id="cursorGlow"></div>
 
-    <div class="container d-flex justify-content-center align-items-center flex-grow-1">
-        <div class="card text-center">
-            <div class="card-body">
-                <i class="fas fa-shield-alt fa-4x mb-4"></i>
-                <h1 class="card-title code-display" id="code" onclick="copyCode()">در حال بارگذاری...</h1>
-                <p class="text-muted">برای کپی کردن کد، روی آن کلیک کنید.</p>
-                <div class="timer mt-3">
-                    <i class="fas fa-clock me-2"></i>
-                    <span id="timer">زمان باقی‌مانده: 30 ثانیه</span>
-                </div>
+    <!-- Language Switcher -->
+    <div class="language-switcher">
+        <button class="language-btn" onclick="toggleLanguageDropdown()">
+            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMTUiIHZpZXdCb3g9IjAgMCAyMCAxNSIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjIwIiBoZWlnaHQ9IjE1IiBmaWxsPSIjMDAwMDgwIi8+CjxyZWN0IHdpZHRoPSIyMCIgaGVpZ2h0PSI3LjUiIGZpbGw9IiNmZmZmZmYiLz4KPHJlY3QgeT0iNy41IiB3aWR0aD0iMjAiIGhlaWdodD0iNy41IiBmaWxsPSIjMDAwMDgwIi8+CjxyZWN0IHdpZHRoPSIyMCIgaGVpZ2h0PSI3LjUiIGZpbGw9IiNmZmZmZmYiLz4KPHJlY3QgeT0iNy41IiB3aWR0aD0iMjAiIGhlaWdodD0iNy41IiBmaWxsPSIjMDAwMDgwIi8+Cjwvc3ZnPgo=" alt="English" id="currentFlag">
+            <span id="currentLanguage">English</span>
+            <i class="fas fa-chevron-down"></i>
+        </button>
+        <div class="language-dropdown" id="languageDropdown">
+            <div class="language-option active" onclick="changeLanguage('en')">
+                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMTUiIHZpZXdCb3g9IjAgMCAyMCAxNSIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjIwIiBoZWlnaHQ9IjE1IiBmaWxsPSIjMDAwMDgwIi8+CjxyZWN0IHdpZHRoPSIyMCIgaGVpZ2h0PSI3LjUiIGZpbGw9IiNmZmZmZmYiLz4KPHJlY3QgeT0iNy41IiB3aWR0aD0iMjAiIGhlaWdodD0iNy41IiBmaWxsPSIjMDAwMDgwIi8+CjxyZWN0IHdpZHRoPSIyMCIgaGVpZ2h0PSI3LjUiIGZpbGw9IiNmZmZmZmYiLz4KPHJlY3QgeT0iNy41IiB3aWR0aD0iMjAiIGhlaWdodD0iNy41IiBmaWxsPSIjMDAwMDgwIi8+Cjwvc3ZnPgo=" alt="English">
+                <span>English</span>
+            </div>
+            <div class="language-option" onclick="changeLanguage('fa')">
+                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMTUiIHZpZXdCb3g9IjAgMCAyMCAxNSIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjIwIiBoZWlnaHQ9IjE1IiBmaWxsPSIjMDA4NzAwIi8+CjxyZWN0IHdpZHRoPSIyMCIgaGVpZ2h0PSI3LjUiIGZpbGw9IiNmZmZmZmYiLz4KPHJlY3QgeT0iNy41IiB3aWR0aD0iMjAiIGhlaWdodD0iNy41IiBmaWxsPSIjMDA4NzAwIi8+CjxyZWN0IHdpZHRoPSIyMCIgaGVpZ2h0PSI3LjUiIGZpbGw9IiNmZmZmZmYiLz4KPHJlY3QgeT0iNy41IiB3aWR0aD0iMjAiIGhlaWdodD0iNy41IiBmaWxsPSIjMDA4NzAwIi8+Cjwvc3ZnPgo=" alt="Persian">
+                <span>فارسی</span>
+            </div>
+            <div class="language-option" onclick="changeLanguage('ru')">
+                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMTUiIHZpZXdCb3g9IjAgMCAyMCAxNSIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjIwIiBoZWlnaHQ9IjE1IiBmaWxsPSIjMDAwMDgwIi8+CjxyZWN0IHdpZHRoPSIyMCIgaGVpZ2h0PSI3LjUiIGZpbGw9IiNmZmZmZmYiLz4KPHJlY3QgeT0iNy41IiB3aWR0aD0iMjAiIGhlaWdodD0iNy41IiBmaWxsPSIjMDAwMDgwIi8+CjxyZWN0IHdpZHRoPSIyMCIgaGVpZ2h0PSI3LjUiIGZpbGw9IiNmZmZmZmYiLz4KPHJlY3QgeT0iNy41IiB3aWR0aD0iMjAiIGhlaWdodD0iNy41IiBmaWxsPSIjMDAwMDgwIi8+Cjwvc3ZnPgo=" alt="Russian">
+                <span>Русский</span>
+            </div>
+            <div class="language-option" onclick="changeLanguage('zh')">
+                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMTUiIHZpZXdCb3g9IjAgMCAyMCAxNSIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjIwIiBoZWlnaHQ9IjE1IiBmaWxsPSIjMDAwMDgwIi8+CjxyZWN0IHdpZHRoPSIyMCIgaGVpZ2h0PSI3LjUiIGZpbGw9IiNmZmZmZmYiLz4KPHJlY3QgeT0iNy41IiB3aWR0aD0iMjAiIGhlaWdodD0iNy41IiBmaWxsPSIjMDAwMDgwIi8+CjxyZWN0IHdpZHRoPSIyMCIgaGVpZ2h0PSI3LjUiIGZpbGw9IiNmZmZmZmYiLz4KPHJlY3QgeT0iNy41IiB3aWR0aD0iMjAiIGhlaWdodD0iNy41IiBmaWxsPSIjMDAwMDgwIi8+Cjwvc3ZnPgo=" alt="Chinese">
+                <span>中文</span>
             </div>
         </div>
     </div>
 
+    <!-- Animated Background -->
+    <div class="space-background">
+        <div class="stars"></div>
+        <div class="stars"></div>
+        <div class="stars"></div>
+    </div>
+
+    <!-- Floating Particles -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <div class="glass-card">
+            <div class="text-center">
+                <i class="fas fa-shield-alt security-icon"></i>
+                <h2 class="mb-4" style="color: #00d4ff; font-size: 1.8rem;" id="title">2FA Security Code Service</h2>
+                
+                <div class="code-container" onclick="copyCode()">
+                    <p class="code-display" id="code">Loading...</p>
+                    <small style="color: #aaa; margin-top: 10px; display: block;" id="copyHint">Click to copy the code</small>
+                </div>
+
+                <div class="timer-container">
+                    <div class="timer">
+                        <i class="fas fa-clock"></i>
+                        <span id="timer">Time remaining: 30 seconds</span>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-bar" id="progressBar" style="width: 100%"></div>
+                    </div>
+                </div>
+
+                <button class="btn-space" onclick="refreshCode()">
+                    <i class="fas fa-sync-alt me-2"></i>
+                    <span id="refreshBtn">Refresh Code</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Copy Success Notification -->
+    <div class="copy-success" id="copySuccess">
+        <i class="fas fa-check-circle me-2"></i>
+        <span id="copySuccessText">Code copied successfully!</span>
+    </div>
+
+    <!-- Footer -->
     <footer class="footer">
         <div class="container">
-            <span class="text-muted">تمامی حقوق محفوظ میباشد © 2025</span>
+            <span style="color: #00d4ff;" id="footerText">All rights reserved © 2025</span>
         </div>
     </footer>
 
-    <div class="ad-popup" id="adPopup">
-        <div class="ad-content">
-            <i class="fab fa-telegram-plane"></i>
-            <span>برای خدمات ابری امن و سریع، به کانال ما در تلگرام بپیوندید: <a href="https://t.me/HoleshCloud" target="_blank">@HoleshCloud</a></span>
-        </div>
-        <button class="ad-close-btn" onclick="closeAdPopup()"><i class="fas fa-times"></i></button>
-    </div>
-
-    <div class="modal fade" id="copyModal" tabindex="-1" aria-labelledby="copyModalLabel" aria-hidden="true">
+    <!-- Bootstrap Modal -->
+    <div class="modal fade" id="copyModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="copyModalLabel">تأیید</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title" id="modalTitle">Success</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    کد با موفقیت کپی شد!
+                    <span id="modalBodyText">Code copied successfully!</span>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">باشه</button>
+                    <button type="button" class="btn btn-space" data-bs-dismiss="modal" id="modalButton">OK</button>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
 
     <script>
+        // Language translations
+        const translations = {
+            en: {
+                title: "2FA Security Code Service",
+                copyHint: "Click to copy the code",
+                refreshBtn: "Refresh Code",
+                copySuccessText: "Code copied successfully!",
+                footerText: "All rights reserved © 2025",
+                modalTitle: "Success",
+                modalBodyText: "Code copied successfully!",
+                modalButton: "OK",
+                loadingText: "Loading...",
+                timeRemaining: "Time remaining: ",
+                seconds: " seconds",
+                hashError: "Hash not provided.",
+                invalidHashError: "Invalid hash!",
+                libError: "otplib library not loaded!",
+                codeError: "Error generating code!",
+                currentLanguage: "English"
+            },
+            fa: {
+                title: "سرویس دریافت کد امنیتی",
+                copyHint: "برای کپی کردن کلیک کنید",
+                refreshBtn: "بروزرسانی کد",
+                copySuccessText: "کد با موفقیت کپی شد!",
+                footerText: "تمامی حقوق محفوظ میباشد © 2025",
+                modalTitle: "تأیید",
+                modalBodyText: "کد با موفقیت کپی شد!",
+                modalButton: "باشه",
+                loadingText: "در حال بارگذاری...",
+                timeRemaining: "زمان باقی‌مانده: ",
+                seconds: " ثانیه",
+                hashError: "هش ارسال نشده است.",
+                invalidHashError: "هش نامعتبر است!",
+                libError: "کتابخانه otplib بارگذاری نشد!",
+                codeError: "خطا در تولید کد!",
+                currentLanguage: "فارسی"
+            },
+            ru: {
+                title: "Сервис получения 2FA кода",
+                copyHint: "Нажмите, чтобы скопировать код",
+                refreshBtn: "Обновить код",
+                copySuccessText: "Код успешно скопирован!",
+                footerText: "Все права защищены © 2025",
+                modalTitle: "Успех",
+                modalBodyText: "Код успешно скопирован!",
+                modalButton: "ОК",
+                loadingText: "Загрузка...",
+                timeRemaining: "Осталось времени: ",
+                seconds: " секунд",
+                hashError: "Хеш не предоставлен.",
+                invalidHashError: "Недействительный хеш!",
+                libError: "Библиотека otplib не загружена!",
+                codeError: "Ошибка генерации кода!",
+                currentLanguage: "Русский"
+            },
+            zh: {
+                title: "2FA安全码服务",
+                copyHint: "点击复制代码",
+                refreshBtn: "刷新代码",
+                copySuccessText: "代码复制成功！",
+                footerText: "版权所有 © 2025",
+                modalTitle: "成功",
+                modalBodyText: "代码复制成功！",
+                modalButton: "确定",
+                loadingText: "加载中...",
+                timeRemaining: "剩余时间：",
+                seconds: " 秒",
+                hashError: "未提供哈希值。",
+                invalidHashError: "无效的哈希值！",
+                libError: "otplib库未加载！",
+                codeError: "生成代码时出错！",
+                currentLanguage: "中文"
+            }
+        };
+
+        // Language flags (SVG data URLs)
+        const flags = {
+            en: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMTUiIHZpZXdCb3g9IjAgMCAyMCAxNSIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjIwIiBoZWlnaHQ9IjE1IiBmaWxsPSIjMDAwMDgwIi8+CjxyZWN0IHdpZHRoPSIyMCIgaGVpZ2h0PSI3LjUiIGZpbGw9IiNmZmZmZmYiLz4KPHJlY3QgeT0iNy41IiB3aWR0aD0iMjAiIGhlaWdodD0iNy41IiBmaWxsPSIjMDAwMDgwIi8+CjxyZWN0IHdpZHRoPSIyMCIgaGVpZ2h0PSI3LjUiIGZpbGw9IiNmZmZmZmYiLz4KPHJlY3QgeT0iNy41IiB3aWR0aD0iMjAiIGhlaWdodD0iNy41IiBmaWxsPSIjMDAwMDgwIi8+Cjwvc3ZnPgo=",
+            fa: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMTUiIHZpZXdCb3g9IjAgMCAyMCAxNSIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjIwIiBoZWlnaHQ9IjE1IiBmaWxsPSIjMDA4NzAwIi8+CjxyZWN0IHdpZHRoPSIyMCIgaGVpZ2h0PSI3LjUiIGZpbGw9IiNmZmZmZmYiLz4KPHJlY3QgeT0iNy41IiB3aWR0aD0iMjAiIGhlaWdodD0iNy41IiBmaWxsPSIjMDA4NzAwIi8+CjxyZWN0IHdpZHRoPSIyMCIgaGVpZ2h0PSI3LjUiIGZpbGw9IiNmZmZmZmYiLz4KPHJlY3QgeT0iNy41IiB3aWR0aD0iMjAiIGhlaWdodD0iNy41IiBmaWxsPSIjMDA4NzAwIi8+Cjwvc3ZnPgo=",
+            ru: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMTUiIHZpZXdCb3g9IjAgMCAyMCAxNSIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjIwIiBoZWlnaHQ9IjE1IiBmaWxsPSIjMDAwMDgwIi8+CjxyZWN0IHdpZHRoPSIyMCIgaGVpZ2h0PSI3LjUiIGZpbGw9IiNmZmZmZmYiLz4KPHJlY3QgeT0iNy41IiB3aWR0aD0iMjAiIGhlaWdodD0iNy41IiBmaWxsPSIjMDAwMDgwIi8+CjxyZWN0IHdpZHRoPSIyMCIgaGVpZ2h0PSI3LjUiIGZpbGw9IiNmZmZmZmYiLz4KPHJlY3QgeT0iNy41IiB3aWR0aD0iMjAiIGhlaWdodD0iNy41IiBmaWxsPSIjMDAwMDgwIi8+Cjwvc3ZnPgo=",
+            zh: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMTUiIHZpZXdCb3g9IjAgMCAyMCAxNSIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjIwIiBoZWlnaHQ9IjE1IiBmaWxsPSIjMDAwMDgwIi8+CjxyZWN0IHdpZHRoPSIyMCIgaGVpZ2h0PSI3LjUiIGZpbGw9IiNmZmZmZmYiLz4KPHJlY3QgeT0iNy41IiB3aWR0aD0iMjAiIGhlaWdodD0iNy41IiBmaWxsPSIjMDAwMDgwIi8+CjxyZWN0IHdpZHRoPSIyMCIgaGVpZ2h0PSI3LjUiIGZpbGw9IiNmZmZmZmYiLz4KPHJlY3QgeT0iNy41IiB3aWR0aD0iMjAiIGhlaWdodD0iNy41IiBmaWxsPSIjMDAwMDgwIi8+Cjwvc3ZnPgo="
+        };
+
+        // Current language (default: English)
+        let currentLanguage = 'en';
+
+        // Language functions
+        function toggleLanguageDropdown() {
+            const dropdown = document.getElementById('languageDropdown');
+            dropdown.classList.toggle('show');
+        }
+
+        function changeLanguage(lang) {
+            currentLanguage = lang;
+            
+            // Update document direction
+            document.documentElement.lang = lang;
+            document.documentElement.dir = lang === 'fa' ? 'rtl' : 'ltr';
+            
+            // Update page title
+            document.title = translations[lang].title + " - Space Edition";
+            
+            // Update all text elements
+            document.getElementById('title').innerText = translations[lang].title;
+            document.getElementById('copyHint').innerText = translations[lang].copyHint;
+            document.getElementById('refreshBtn').innerText = translations[lang].refreshBtn;
+            document.getElementById('copySuccessText').innerText = translations[lang].copySuccessText;
+            document.getElementById('footerText').innerText = translations[lang].footerText;
+            document.getElementById('modalTitle').innerText = translations[lang].modalTitle;
+            document.getElementById('modalBodyText').innerText = translations[lang].modalBodyText;
+            document.getElementById('modalButton').innerText = translations[lang].modalButton;
+            document.getElementById('currentLanguage').innerText = translations[lang].currentLanguage;
+            
+            // Update flag
+            document.getElementById('currentFlag').src = flags[lang];
+            
+            // Update active state in dropdown
+            document.querySelectorAll('.language-option').forEach(option => {
+                option.classList.remove('active');
+            });
+            event.target.closest('.language-option').classList.add('active');
+            
+            // Close dropdown
+            document.getElementById('languageDropdown').classList.remove('show');
+            
+            // Update timer text
+            updateTimerText();
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const languageSwitcher = document.querySelector('.language-switcher');
+            if (!languageSwitcher.contains(event.target)) {
+                document.getElementById('languageDropdown').classList.remove('show');
+            }
+        });
+
+        // Create floating particles with device optimization
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            
+            // Reduce particles on mobile devices for better performance
+            const isMobile = window.innerWidth <= 768;
+            const particleCount = isMobile ? 25 : 50;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 3 + 3) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Validate hash
         function validateHash(hash) {
             if (!hash || hash.length < 16 || hash.length > 32) {
                 return false;
@@ -307,102 +1022,256 @@
             return true;
         }
 
+        // Get URL parameters
         const urlParams = new URLSearchParams(window.location.search);
         const hash = urlParams.get('hash');
 
+        // DOM elements
         const codeElement = document.getElementById('code');
         const timerElement = document.getElementById('timer');
-        const cursorFollower = document.getElementById('cursorFollower');
+        const progressBar = document.getElementById('progressBar');
+        const copySuccess = document.getElementById('copySuccess');
 
         let hasRefreshed = false;
+        let timeLeft = 30;
 
+        // Initialize
         try {
             if (!hash) {
-                throw new Error("هش ارسال نشده است.");
+                throw new Error(translations[currentLanguage].hashError);
             }
             if (!validateHash(hash)) {
-                throw new Error("هش نامعتبر است!");
+                throw new Error(translations[currentLanguage].invalidHashError);
             }
 
             if (typeof otplib === 'undefined') {
-                throw new Error("کتابخانه otplib بارگذاری نشد!");
+                throw new Error(translations[currentLanguage].libError);
             }
 
+            // Create particles
+            createParticles();
+
+            // Update code function
             const updateCode = () => {
                 try {
                     const code = otplib.authenticator.generate(hash);
                     codeElement.innerText = code;
                 } catch (err) {
-                    codeElement.innerText = "خطا در تولید کد!";
+                    codeElement.innerText = translations[currentLanguage].codeError;
                     console.error("خطا در تولید کد TOTP:", err);
                 }
             };
 
+            // Update timer text function
+            function updateTimerText() {
+                if (timerElement) {
+                    timerElement.textContent = translations[currentLanguage].timeRemaining + timeLeft + translations[currentLanguage].seconds;
+                }
+            }
+
+            // Update timer function
             const updateTimer = () => {
                 const now = Math.floor(Date.now() / 1000);
-                const timeLeft = 30 - (now % 30); 
-                timerElement.textContent = `زمان باقی‌مانده: ${timeLeft} ثانیه`;
+                timeLeft = 30 - (now % 30);
+                
+                timerElement.textContent = translations[currentLanguage].timeRemaining + timeLeft + translations[currentLanguage].seconds;
+                
+                // Update progress bar
+                const progress = (timeLeft / 30) * 100;
+                progressBar.style.width = progress + '%';
 
                 if (timeLeft <= 1 && !hasRefreshed) {
-                    hasRefreshed = true; 
-                    window.location.reload(); 
+                    hasRefreshed = true;
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
                 }
             };
 
+            // Initialize
             updateCode();
             updateTimer();
 
+            // Start timer
             setInterval(updateTimer, 1000);
 
         } catch (error) {
             codeElement.innerText = error.message;
             timerElement.style.display = "none";
+            progressBar.style.display = "none";
             console.error("خطا:", error);
         }
 
+        // Copy code function
         function copyCode() {
             const codeText = codeElement.innerText;
-            navigator.clipboard.writeText(codeText).then(() => {
-                const copyModal = new bootstrap.Modal(document.getElementById('copyModal'));
-                copyModal.show();
-            }).catch(err => {
+            
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(codeText).then(() => {
+                    showCopySuccess();
+                }).catch(err => {
+                    fallbackCopyTextToClipboard(codeText);
+                });
+            } else {
+                fallbackCopyTextToClipboard(codeText);
+            }
+        }
+
+        // Fallback copy function
+        function fallbackCopyTextToClipboard(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.top = "0";
+            textArea.style.left = "0";
+            textArea.style.position = "fixed";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                document.execCommand('copy');
+                showCopySuccess();
+            } catch (err) {
                 console.error('خطا در کپی کردن کد: ', err);
+            }
+            
+            document.body.removeChild(textArea);
+        }
+
+        // Show copy success notification
+        function showCopySuccess() {
+            copySuccess.classList.add('show');
+            setTimeout(() => {
+                copySuccess.classList.remove('show');
+            }, 3000);
+        }
+
+        // Refresh code function
+        function refreshCode() {
+            window.location.reload();
+        }
+
+        // Add hover effects to glass card (only on desktop)
+        const glassCard = document.querySelector('.glass-card');
+        
+        // Check if device supports hover
+        if (window.matchMedia('(hover: hover)').matches) {
+            glassCard.addEventListener('mousemove', (e) => {
+                const card = e.currentTarget;
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                
+                const rotateX = (y - centerY) / 10;
+                const rotateY = (centerX - x) / 10;
+                
+                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(10px)`;
+            });
+
+            glassCard.addEventListener('mouseleave', (e) => {
+                e.currentTarget.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) translateZ(0)';
             });
         }
-		let currentLanguage = 'fa';
-        function changeLanguage() {
-            const select = document.getElementById('languageSelect');
-            currentLanguage = select.value;
-            document.documentElement.lang = currentLanguage;
-            document.documentElement.dir = currentLanguage === 'fa' ? 'rtl' : 'ltr';
-            document.title = translations[currentLanguage].title;
-            document.getElementById('copyText').innerText = translations[currentLanguage].copyText;
-            document.getElementById('footerText').innerText = translations[currentLanguage].footerText;
-            document.getElementById('adText').innerHTML = `${translations[currentLanguage].adText}<a href="https://t.me/HoleshCloud" target="_blank">@HoleshCloud</a>`;
-            document.getElementById('copyModalLabel').innerText = translations[currentLanguage].modalTitle;
-            document.getElementById('modalBodyText').innerText = translations[currentLanguage].modalBody;
-            document.getElementById('modalButtonText').innerText = translations[currentLanguage].modalButton;
-            document.getElementById('code').innerText = translations[currentLanguage].loadingText;
-            updateTimer(); 
-        }
 
+        // Handle window resize for responsive design
+        window.addEventListener('resize', () => {
+            // Recreate particles with appropriate count for new screen size
+            const particlesContainer = document.getElementById('particles');
+            particlesContainer.innerHTML = '';
+            createParticles();
+        });
 
-//        function showAdPopup() {
-//            const adPopup = document.getElementById('adPopup');
-//            adPopup.classList.add('show');
-//        }
+        // Mouse trail effect
+        let mouseX = 0;
+        let mouseY = 0;
+        let trailDots = [];
+        const maxTrailDots = 15;
+        let isMouseMoving = false;
+        let mouseMoveTimeout;
 
+        const mouseTrail = document.getElementById('mouseTrail');
+        const cursorGlow = document.getElementById('cursorGlow');
 
-        function closeAdPopup() {
-            const adPopup = document.getElementById('adPopup');
-            adPopup.style.display = 'none';
-        }
-
-        setTimeout(showAdPopup, 2000);
-
+        // Track mouse movement
         document.addEventListener('mousemove', (e) => {
-            cursorFollower.style.left = `${e.clientX}px`;
-            cursorFollower.style.top = `${e.clientY}px`;
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            
+            // Update cursor glow
+            cursorGlow.style.left = mouseX + 'px';
+            cursorGlow.style.top = mouseY + 'px';
+            
+            // Create trail dot
+            createTrailDot(mouseX, mouseY);
+            
+            // Set mouse moving state
+            isMouseMoving = true;
+            clearTimeout(mouseMoveTimeout);
+            
+            mouseMoveTimeout = setTimeout(() => {
+                isMouseMoving = false;
+            }, 100);
+        });
+
+        // Create trail dot with throttling for better performance
+        let lastTrailTime = 0;
+        const trailThrottle = 50; // milliseconds between trail dots
+
+        function createTrailDot(x, y) {
+            const now = Date.now();
+            if (now - lastTrailTime < trailThrottle) {
+                return; // Throttle trail creation
+            }
+            lastTrailTime = now;
+
+            const dot = document.createElement('div');
+            dot.className = 'trail-dot';
+            dot.style.left = x + 'px';
+            dot.style.top = y + 'px';
+            
+            mouseTrail.appendChild(dot);
+            trailDots.push(dot);
+            
+            // Remove dot after animation
+            setTimeout(() => {
+                if (dot.parentNode) {
+                    dot.parentNode.removeChild(dot);
+                    trailDots = trailDots.filter(d => d !== dot);
+                }
+            }, 1000);
+            
+            // Limit number of dots
+            if (trailDots.length > maxTrailDots) {
+                const oldDot = trailDots.shift();
+                if (oldDot && oldDot.parentNode) {
+                    oldDot.parentNode.removeChild(oldDot);
+                }
+            }
+        }
+
+        // Add hover effect to cursor glow
+        document.addEventListener('mouseover', (e) => {
+            if (e.target.closest('.glass-card') || e.target.closest('.btn-space') || e.target.closest('.code-container')) {
+                cursorGlow.style.transform = 'translate(-50%, -50%) scale(1.5)';
+                cursorGlow.style.background = 'radial-gradient(circle, rgba(0, 212, 255, 0.5) 0%, transparent 70%)';
+            }
+        });
+
+        document.addEventListener('mouseout', (e) => {
+            cursorGlow.style.transform = 'translate(-50%, -50%) scale(1)';
+            cursorGlow.style.background = 'radial-gradient(circle, rgba(0, 212, 255, 0.3) 0%, transparent 70%)';
+        });
+
+        // Pause trail when mouse leaves window
+        document.addEventListener('mouseleave', () => {
+            cursorGlow.style.opacity = '0';
+        });
+
+        document.addEventListener('mouseenter', () => {
+            cursorGlow.style.opacity = '1';
         });
     </script>
 </body>
